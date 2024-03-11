@@ -1,3 +1,5 @@
+#SYNERGY PRACTICS CASE 4
+
 import math #Подключаем модуль math для вызова его функции вычисления факториала
 
 
