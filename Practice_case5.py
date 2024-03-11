@@ -13,8 +13,7 @@ import pickle
 #Configs
 number_to_guess = random.randint(1, 100) #диапазон чисел для загадывания
 max_attempts = 10                        #макс кол-во попыток игрока 
-
-leaderboard_file = "u_ratings/leaderboard.pickle"
+leaderboard_file = "u_ratings/leaderboard.pkl" #файл сохранения рейтинга игроков
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
