@@ -8,49 +8,47 @@
 
 import random
 import os
+import pickle
+
+leaderboard_file = "u_ratings/leaderboard.pickle"
 
 def show_leaderboard():
     try:
-        with open("u_ratings/rating.game", "r") as file:
-            print("\n***** РЕЙТИНГ *****")
-            print(file.read())
+        # Десериализация данных из файла leaderboard.pickle
+        with open(leaderboard_file, "rb") as file:
+            leaderboard = pickle.load(file)
+            sorted_leaderboard = sorted(leaderboard, key=lambda x: x["score"])
+            
+            print("\n***** ТАБЛИЦА ЛИДЕРОВ *****")
+            
+            for idx, entry in enumerate(sorted_leaderboard, start=1):
+                print(f"{idx}. Игрок: {entry['username']}, Попыток: {entry['score']}")
+            
+            print("***************************\n")
+
     except FileNotFoundError:
-        print("Рейтинг еще не сформирован.")
+        print("Таблица лидеров еще не сформирована.")
 
-def update_leaderboard(player_name, attempts):
-    if not os.path.exists("u_ratings"):
-        os.makedirs("u_ratings")
-
-    leaderboard_path = "u_ratings/rating.game"
-    player_data = f"{player_name} | {attempts} попыток\n"
-    player_added = False
-
-    if not os.path.isfile(leaderboard_path):
-        with open(leaderboard_path, "w") as file:
-            file.write(player_data)
-    else:
+def update_leaderboard(username, score):
+    try:
+        # Десериализация данных из файла leaderboard.pickle
+        with open(leaderboard_file, "rb") as file:
+            leaderboard = pickle.load(file)
+    except FileNotFoundError:
         leaderboard = []
-        with open(leaderboard_path, "r") as file:
-            for line in file:
-                name, score = line.strip().split(" | ")
-                score = int(score[:-7])  # Extract the number of attempts
-                if name == player_name:
-                    player_added = True
-                    if attempts < score:
-                        leaderboard.append(player_data)
-                    else:
-                        leaderboard.append(line)
-                else:
-                    leaderboard.append(line)
 
-        if not player_added:
-            leaderboard.append(player_data)
+    new_entry = {"username": username, "score": score}
+    leaderboard.append(new_entry)
 
-        leaderboard.sort(key=lambda x: int(x.split(" | ")[1][:-7]))
-        
-        with open(leaderboard_path, "w") as file:
-            for entry in leaderboard:
-                file.write(entry)
+    # Сортировка лидеров по наименьшему количеству попыток
+    leaderboard = sorted(leaderboard, key=lambda x: x["score"])
+
+    # Сериализация данных таблицы лидеров обновленной версии в файл leaderboard.pickle
+    with open(leaderboard_file, "wb") as file:
+        pickle.dump(leaderboard, file)
+
+    print("Таблица лидеров была успешно обновлена!")
+
 
 def game_menu():
     print("Добро пожаловать в игру 'Угадай число'!")
@@ -69,7 +67,7 @@ def game_menu():
             print("Спасибо за игру! До свидания!")
             break
         else:
-            print("Неверный выбор. Попробуйте снова.")
+            print("---Опция не выбрана---")
 
 def play_game(player_name):
     number_to_guess = random.randint(1, 100)
